@@ -268,6 +268,9 @@ video{
 </div>
 
 <script>
+const IS_ANDROID = /Android/i.test(navigator.userAgent);
+const IS_ZEBRA = /Zebra|TC\d+|ET\d+|MC\d+/i.test(navigator.userAgent);
+const FORCE_EXTERNAL = IS_ANDROID || IS_ZEBRA;
 const PIN="8602";
 const STORAGE_KEY="vmo2_video_unlocked_session";
 
@@ -328,27 +331,30 @@ function build(){
     let media;
     let tap=null;
 
-    if(v.embed){
-      media=document.createElement("iframe");
-      media.src=v.embed;
-      media.allow="autoplay; fullscreen";
-      media.allowFullscreen=true;
-      media.referrerPolicy="no-referrer";
-      media.style.width="100%";
-      media.style.height="100%";
-      media.style.border="0";
-    }else{
-      media=document.createElement("video");
-      media.src=v.src;
-      media.muted=true;
-      media.playsInline=true;
+if(v.embed && FORCE_EXTERNAL){
+  media=document.createElement("div");
+  media.className="externalCard";
 
-      tap=document.createElement("div");
-      tap.className="tap";
-      tap.onclick=()=>{
-        media.paused ? media.play().catch(()=>{}) : media.pause();
-      };
-    }
+  const play=document.createElement("button");
+  play.className="btn alt";
+  play.textContent="Open video";
+  play.onclick=()=>{
+    if(!isUnlocked()) return;
+    window.location.href=v.embed;
+  };
+
+  media.appendChild(play);
+}else if(v.embed){
+  media=document.createElement("iframe");
+  media.src=v.embed;
+  media.allow="autoplay; fullscreen";
+  media.allowFullscreen=true;
+  media.referrerPolicy="no-referrer";
+  media.style.width="100%";
+  media.style.height="100%";
+  media.style.border="0";
+}
+
 
     const overlay=document.createElement("div");
     overlay.className="overlay";
@@ -386,6 +392,11 @@ function build(){
     const note=document.createElement("div");
     note.className="note";
     note.textContent=v.note;
+
+    if(FORCE_EXTERNAL && v.embed){
+  note.textContent = "Tap Open video to play (opens securely in Microsoft 365)";
+}
+
 
     const controls=document.createElement("div");
     controls.className="controls";
