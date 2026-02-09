@@ -325,28 +325,30 @@ function build(){
     const slide=document.createElement("section");
     slide.className="slide";
 
-let media;
+    let media;
+    let tap=null;
 
-if(v.embed){
-  media=document.createElement("iframe");
-  media.src=v.embed;
-  media.allow="autoplay; fullscreen";
-  media.allowFullscreen=true;
-  media.referrerPolicy="no-referrer";
-  media.style.width="100%";
-  media.style.height="100%";
-  media.style.border="0";
-}else{
-  media=document.createElement("video");
-  media.src=v.src;
-  media.muted=true;
-  media.playsInline=true;
-}
+    if(v.embed){
+      media=document.createElement("iframe");
+      media.src=v.embed;
+      media.allow="autoplay; fullscreen";
+      media.allowFullscreen=true;
+      media.referrerPolicy="no-referrer";
+      media.style.width="100%";
+      media.style.height="100%";
+      media.style.border="0";
+    }else{
+      media=document.createElement("video");
+      media.src=v.src;
+      media.muted=true;
+      media.playsInline=true;
 
-
-
-    const tap=document.createElement("div");
-    tap.className="tap";
+      tap=document.createElement("div");
+      tap.className="tap";
+      tap.onclick=()=>{
+        media.paused ? media.play().catch(()=>{}) : media.pause();
+      };
+    }
 
     const overlay=document.createElement("div");
     overlay.className="overlay";
@@ -369,19 +371,14 @@ if(v.embed){
     headerLeft.appendChild(logo);
     headerLeft.appendChild(badge);
 
-    const lockWrap=document.createElement("div");
-    lockWrap.className="lockBtnWrap";
-
     const lockBtn=document.createElement("button");
     lockBtn.className="btn ghost";
     lockBtn.type="button";
     lockBtn.textContent="Lock";
     lockBtn.onclick=()=>setLocked(true);
 
-    lockWrap.appendChild(lockBtn);
-
     header.appendChild(headerLeft);
-    header.appendChild(lockWrap);
+    header.appendChild(lockBtn);
 
     const footer=document.createElement("div");
     footer.className="footer";
@@ -403,6 +400,21 @@ if(v.embed){
     next.type="button";
     next.textContent="Next";
 
+    if(v.embed) mute.style.display="none";
+
+    mute.onclick=()=>{
+      if(!isUnlocked()) return;
+      if(media.tagName.toLowerCase()!=="video") return;
+      media.muted=!media.muted;
+      mute.textContent=media.muted?"Unmute":"Mute";
+      media.play().catch(()=>{});
+    };
+
+    next.onclick=()=>{
+      if(!isUnlocked()) return;
+      goTo(i+1);
+    };
+
     controls.appendChild(mute);
     controls.appendChild(next);
 
@@ -413,7 +425,7 @@ if(v.embed){
     overlay.appendChild(footer);
 
     slide.appendChild(media);
-    slide.appendChild(tap);
+    if(tap) slide.appendChild(tap);
     slide.appendChild(overlay);
 
     let startX=0,startY=0;
@@ -431,26 +443,10 @@ if(v.embed){
       if(Math.abs(dx)>Math.abs(dy)&&dx<-60)goTo(i-1);
     },{passive:true});
 
-    tap.onclick=()=>{
-      if(!isUnlocked()) return;
-      video.paused?video.play().catch(()=>{}):video.pause();
-    };
-
-    mute.onclick=()=>{
-      if(!isUnlocked()) return;
-      video.muted=!video.muted;
-      mute.textContent=video.muted?"Unmute":"Mute";
-      video.play().catch(()=>{});
-    };
-
-    next.onclick=()=>{
-      if(!isUnlocked()) return;
-      goTo(i+1);
-    };
-
     track.appendChild(slide);
   });
 }
+
 
 const observer=new IntersectionObserver(entries=>{
   entries.forEach(e=>{
