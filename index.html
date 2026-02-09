@@ -321,10 +321,12 @@ function build(){
     const slide=document.createElement("section");
     slide.className="slide";
 
-    const video=document.createElement("video");
-    video.src=v.src;
-    video.muted=true;
-    video.playsInline=true;
+const video=document.createElement("video");
+video.src=v.src;
+video.muted=true;
+video.playsInline=true;
+video.setAttribute("crossorigin","use-credentials");
+
 
     const tap=document.createElement("div");
     tap.className="tap";
