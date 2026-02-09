@@ -400,6 +400,17 @@ function build(){
     next.type="button";
     next.textContent="Next";
 
+    const open=document.createElement("button");
+open.className="btn ghost";
+open.type="button";
+open.textContent="Open";
+open.onclick=()=>{
+  if(!isUnlocked()) return;
+  const url = v.embed ? v.embed : v.src;
+  window.open(url, "_blank", "noopener");
+};
+
+
     if(v.embed) mute.style.display="none";
 
     mute.onclick=()=>{
@@ -417,6 +428,8 @@ function build(){
 
     controls.appendChild(mute);
     controls.appendChild(next);
+    controls.appendChild(open);
+
 
     footer.appendChild(note);
     footer.appendChild(controls);
